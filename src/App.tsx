@@ -19,13 +19,13 @@ function App() {
               <Nav screens={isNav} />    
           </Col>
 
-          <Col xs={24} md={20} xl={21} style={{backgroundColor: "#86bdf2", minHeight: "100vh"}}>
+          <Col xs={24} md={20} xl={21} style={{backgroundColor: "#cce3fa", minHeight: "100vh"}}>
 
             <Outlet />
           </Col>
         </Row>
       : <Row>
-          <Col xs={24} md={20} xl={21} style={{backgroundColor: "#86bdf2", minHeight: "100vh"}}>
+          <Col xs={24} md={20} xl={21} style={{backgroundColor: "#cce3fa", minHeight: "100vh"}}>
             <Nav screens={isNav} />    
             <Outlet />
           </Col>

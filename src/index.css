@@ -2,3 +2,30 @@
   margin: 0;
   padding: 0;
 }
+
+.ant-table-thead > tr > th {
+  background-color: #001529 !important;
+  color: white !important;
+}
+
+.even-row {
+  background-color: #f2f2f2;
+  cursor: pointer;
+}
+
+.odd-row {
+  background-color: #a4c7e9;
+  cursor: pointer;
+}
+
+.ant-table-tbody > tr >td {
+  color: #303030 !important;
+}
+
+.ant-table-tbody > tr:hover > td{
+  background-color: #3f81be !important;
+}
+
+.ant-table-row-selected {
+  background-color: #e6f7ff !important; /* Color de fondo personalizado */
+}

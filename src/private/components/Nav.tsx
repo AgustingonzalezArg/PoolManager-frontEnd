@@ -1,5 +1,5 @@
-import { HomeOutlined, MenuOutlined, UsergroupAddOutlined, UserOutlined } from '@ant-design/icons'
-import { Button, Col, Drawer, Menu, Row } from 'antd'
+import { CloseOutlined, HomeOutlined, MenuOutlined, UsergroupAddOutlined, UserOutlined } from '@ant-design/icons'
+import { Button, Drawer, Menu } from 'antd'
 import { useState } from 'react'
 import { MenuProps } from 'antd/es/menu'; 
 import { Link } from 'react-router-dom'
@@ -67,6 +67,7 @@ export const Nav = ({screens}: Props) => {
             style={{backgroundColor: "#001529", color: "white"}}
             open={drawerVisible}
             width={200}
+            closeIcon={<CloseOutlined style={{ color: "white" }} />}
         >
             <Menu
               onClick={handleClick}
