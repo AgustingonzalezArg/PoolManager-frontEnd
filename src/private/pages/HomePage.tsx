@@ -1,11 +1,13 @@
 import { Card, Col, Flex, Progress, Row, Table, TableProps, Typography } from "antd"
 import "../../index.css"
+import { NonPayment } from "../components/NonPayment"
+import { CarryOutOutlined, DollarOutlined } from "@ant-design/icons"
 
 const { Title, Text} = Typography
 
 type Props = {}
 
-type columnsType = {
+export type columnsType = {
     title: string
     dataIndex: string
     key: string
@@ -142,15 +144,18 @@ export const HomePage  = (props: Props) => {
                             <Row justify={"center"}>
                                 <Card 
                                     style={{backgroundColor: "#63acf2", 
-                                        minWidth: "200px", 
+                                        minWidth: "223px", 
                                         minHeight: "132px",
                                         display: "inline-block"}} 
-                                    bordered={false}>
-                                    <Title 
-                                        level={2}  
-                                        style={{fontSize: "1.2rem", color: "#e7f0f9"}} >
-                                        Pools of the Day
-                                    </Title>
+                                        bordered={false}>
+                                        <Flex wrap gap={"small"} justify="space-between" align="center">
+                                            <Title 
+                                                level={2}  
+                                                style={{fontSize: "1.2rem", color: "#e7f0f9"}} >
+                                                Pools of the Day
+                                            </Title>
+                                            <CarryOutOutlined style={{fontSize: "1.5rem", color:"white"}}/>
+                                        </Flex>
                                     <Flex wrap gap={"small"} justify="space-around" align="center">
                                         <Text 
                                             style={{fontSize: "2rem", fontWeight: 700, color: "#e7f0f9"}}> 
@@ -168,15 +173,18 @@ export const HomePage  = (props: Props) => {
                             <Row justify={"center"}>
                                 <Card
                                     style={{backgroundColor: "#63acf2", 
-                                        minWidth:"200px", 
+                                        minWidth:"223px", 
                                         display: "inline-block",
                                         minHeight: "132px",}} 
-                                    bordered={false}>
-                                    <Title 
-                                        level={2} 
-                                        style={{marginBottom: 0 , fontSize: "1.2rem", color: "#e7f0f9"}} >
-                                        Billing
-                                    </Title>
+                                        bordered={false}>
+                                        <Flex wrap gap={"small"} justify="space-between" align="center">
+                                            <Title 
+                                                level={2} 
+                                                style={{marginBottom: 0 , fontSize: "1.2rem", color: "#e7f0f9"}} >
+                                                Billing
+                                            </Title>
+                                            <DollarOutlined style={{fontSize:"1.5rem", color:"white"}}/>
+                                        </Flex>
                                     <Text 
                                         style={{fontSize: "2rem", fontWeight: 700, color: "#e7f0f9"}}> 
                                         $50000
@@ -187,7 +195,7 @@ export const HomePage  = (props: Props) => {
                     </Row>
                 </Col>
             </Row>
-            <Row style={{padding: "25px"}}
+            <Row style={{padding: "25px", margin: 0}}
                 gutter={[15, 15]}
                 >
                 <Col xs={24} md={12}>
@@ -203,18 +211,11 @@ export const HomePage  = (props: Props) => {
                     />
                 </Col>
                 <Col xs={24} md={12}>
-                <Title level={2}>Clients</Title>
-                <Table 
-                    columns={clientsColumns} 
-                    dataSource={dataClients} 
-                    rowSelection={rowSelection}
-                    pagination={{pageSize: 10}}
-                    size="small"
-                    rowClassName={(_, index) => (index % 2 === 0 ? "even-row" : "odd-row")}
-                    style={{boxShadow: "1px 1px 5px black", overflow: "hidden", borderRadius: "10px"}}
-                    />
+                    <Title level={2}>Non Payments</Title>
+                    <NonPayment/>
                 </Col>
             </Row>
+            
     </div>
   )
 }
