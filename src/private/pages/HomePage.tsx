@@ -2,6 +2,9 @@ import { Card, Col, Flex, Progress, Row, Table, TableProps, Typography } from "a
 import "../../index.css"
 import { NonPayment } from "../components/NonPayment"
 import { CarryOutOutlined, DollarOutlined } from "@ant-design/icons"
+import { Key, useState } from "react"
+import { AffixPoolFinished } from "../components/modals/AffixPoolFinished"
+import { DeleteNonPayment } from "../components/modals/DeleteNonPayment"
 
 const { Title, Text} = Typography
 
@@ -22,9 +25,10 @@ type dataColumnsType = {
 }
 
 export const HomePage  = (props: Props) => {
+    const [RowSelected, setRowSelected] = useState<Key[]>([])
+    const [check, setCheck] = useState<number[]>([])
 
-
-    const dataClients: dataColumnsType[] = [
+    const [dataClients, setDataClient] = useState <dataColumnsType[]> ([
         {
             key: "1",
             name: "Nicolas",
@@ -102,8 +106,53 @@ export const HomePage  = (props: Props) => {
             price: 15000,
             status: true
         }
-    ]
+    ])
 
+    const [DataNonPayments, setDataNonPayments] = useState<NonPayment[]>([
+        {
+            key: 1,
+            name: "juan",
+            neighborhood: "a",
+            date: "10/05",
+            price: 9500,
+        },
+        {
+            key: 2,
+            name: "pedro",
+            neighborhood: "aut",
+            date: "12/05",
+            price: 12000,
+        },
+        {
+            key: 3,
+            name: "carla",
+            neighborhood: "aut",
+            date: "14/05",
+            price: 15000,
+        },
+        {
+            key: 4,
+            name: "carla",
+            neighborhood: "aut",
+            date: "14/05",
+            price: 15000,
+        },
+        {
+            key: 5,
+            name: "carla",
+            neighborhood: "aut",
+            date: "14/05",
+            price: 15000,
+        },
+        {
+            key: 6,
+            name: "carla",
+            neighborhood: "aut",
+            date: "14/05",
+            price: 15000,
+        }
+    ])
+  
 
     const clientsColumns : columnsType[] = [
         {
@@ -124,15 +173,27 @@ export const HomePage  = (props: Props) => {
     ]
 
     const rowSelection: TableProps<DataType>['rowSelection'] = {
+        selectedRowKeys: RowSelected,
         onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
-          console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-        },
-        getCheckboxProps: (record: DataType) => ({
-          disabled: record.name === 'Disabled User', // Column configuration not to be checked
-          name: record.name,
-        }),
+            setRowSelected(selectedRowKeys)
+        }
       };
       
+
+    const handleCheck = (check: number[]): void => {
+        setCheck(check)
+    }
+
+    const handleClicDelete = () => {
+        for( const nonPayment of check) {
+             setDataNonPayments((prev) => {
+                return prev.filter(e => e.key !== nonPayment)
+             })
+        }
+        setCheck([])
+        console.log("elementos borrados")
+ 
+     }
 
   return (
     <div>
@@ -199,7 +260,7 @@ export const HomePage  = (props: Props) => {
                 gutter={[15, 15]}
                 >
                 <Col xs={24} md={12}>
-                <Title level={2}>Clients</Title>
+                <Title level={2}>Pools of the Day</Title>
                 <Table 
                     columns={clientsColumns} 
                     dataSource={dataClients} 
@@ -212,10 +273,19 @@ export const HomePage  = (props: Props) => {
                 </Col>
                 <Col xs={24} md={12}>
                     <Title level={2}>Non Payments</Title>
-                    <NonPayment/>
+                    <NonPayment onCheck={handleCheck} DataNonPayments={DataNonPayments}/>
                 </Col>
             </Row>
-            
+            { 
+            RowSelected.length > 0 && (check.length > 0 || check.length === 0) && (
+                <AffixPoolFinished />
+            )
+            }
+            {
+            check.length > 0 && RowSelected.length === 0 && (
+                <DeleteNonPayment handleClic={handleClicDelete} />
+            )
+            }
     </div>
   )
 }

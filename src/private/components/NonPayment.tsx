@@ -1,14 +1,21 @@
 import { Card, Checkbox, Flex, List, Row, TableProps, Typography } from "antd"
 import { columnsType } from "../pages/HomePage"
-import { TableRowSelection } from "antd/es/table/interface"
 import { UserOutlined } from "@ant-design/icons"
-import { useState } from "react"
-import { DeleteNonPayment } from "./modals/DeleteNonPayment"
+import { useEffect, useState } from "react"
 
 const { Text } = Typography
 
+export type NonPayment = {
+    key: number
+    name: string
+    neighborhood: string
+    date: string
+    price: number
+}
+
 type Props = {
-    rowSelection: TableRowSelection<DataType>
+    onCheck: (val: number[]) => void
+    DataNonPayments: NonPayment[]
 }
 
 const NonPaymentsColumns: columnsType[] = [
@@ -34,63 +41,14 @@ const NonPaymentsColumns: columnsType[] = [
     },
 ] 
 
-const rowSelection: TableProps<DataType>['rowSelection'] = {
-    onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
-      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-    },
-    getCheckboxProps: (record: DataType) => ({
-      disabled: record.name === 'Disabled User', // Column configuration not to be checked
-      name: record.name,
-    }),
-  };
-
-  export const NonPayment = () => {
+  export const NonPayment = ({onCheck, DataNonPayments}: Props ) => {
       
     const [check, setCheck] = useState<number[]>([])
-    const [DataNonPayments, setDataNonPayments] = useState([
-        {
-            key: 1,
-            name: "juan",
-            neighborhood: "a",
-            date: "10/05",
-            price: 9500,
-        },
-        {
-            key: 2,
-            name: "pedro",
-            neighborhood: "aut",
-            date: "12/05",
-            price: 12000,
-        },
-        {
-            key: 3,
-            name: "carla",
-            neighborhood: "aut",
-            date: "14/05",
-            price: 15000,
-        },
-        {
-            key: 4,
-            name: "carla",
-            neighborhood: "aut",
-            date: "14/05",
-            price: 15000,
-        },
-        {
-            key: 5,
-            name: "carla",
-            neighborhood: "aut",
-            date: "14/05",
-            price: 15000,
-        },
-        {
-            key: 6,
-            name: "carla",
-            neighborhood: "aut",
-            date: "14/05",
-            price: 15000,
-        }
-    ])
+  
+    useEffect(() => {
+      onCheck(check)
+
+    }, [check])
     
     const handleCheckbox = (id: number) => {
         setCheck((prevcheck) => {
@@ -101,17 +59,6 @@ const rowSelection: TableProps<DataType>['rowSelection'] = {
             }
         })
       }
-
-    const handleClicDelete = () => {
-       for( const nonPayment of check) {
-            setDataNonPayments((prev) => {
-               return prev.filter(e => e.key !== nonPayment)
-            })
-       }
-       setCheck([])
-       console.log("elementos borrados")
-
-    }
 
       return (
     <div style={{maxHeight:"400px", overflowY: "auto"}}>
@@ -149,7 +96,6 @@ const rowSelection: TableProps<DataType>['rowSelection'] = {
         </List.Item>
         )}
       />
-      {check.length > 0 && <DeleteNonPayment handleClic={handleClicDelete}/>}
     </div>
   );
 }

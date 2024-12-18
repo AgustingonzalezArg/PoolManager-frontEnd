@@ -1,4 +1,6 @@
-import { Button, Col, Form, Input, InputNumber, Modal, Row, Select } from 'antd'
+import { Button, Col, Form, Input, InputNumber, Modal, Row, Select, Typography } from 'antd'
+
+const {Title} = Typography
 
 export type Values = {
     fullname: string
@@ -11,15 +13,15 @@ export type Values = {
 
 type Props = {
     openModal: boolean
-    OnCancel: () => void
-    OnFinish: (values: Values) => void
+    OnFinish: () => void
+    onCancel: () => void
 }
 
-export const AddClientModal = ({openModal, OnCancel, OnFinish }: Props) => {
+export const AddClientModal = ({openModal, OnFinish, onCancel }: Props) => {
     const [form] = Form.useForm()
 
-    const handleFinish = (values: Values): void => {
-        OnFinish(values)
+    const handleFinish = (): void => {
+        OnFinish()
         form.resetFields()
     }
 
@@ -27,8 +29,9 @@ export const AddClientModal = ({openModal, OnCancel, OnFinish }: Props) => {
     <>
       <Modal
         open={openModal}
-        onCancel={OnCancel}
+        onCancel={onCancel}
         footer={null}>
+        <Title level={2} style={{fontSize: "25px"}}>Add new Client</Title>
           <Form
           form={form}
           layout="vertical"
