@@ -6,7 +6,7 @@ import { AddClientModal } from '../components/modals/AddClientModal'
 import { OptionsClientModal } from '../components/modals/OptionsClientModal'
 import { DeleteClientModal } from '../components/modals/DeleteClientModal'
 import { EditClientModal } from '../components/modals/EditClientModal'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 
 const { Title } = Typography
 
@@ -15,23 +15,67 @@ export type DataType = {
   name: string
   neighborhood: string
   price: number
-  periodicity: number
+  periodicity: "weekly" | "biweekly" | "monthly"
   phoneNumber: string
 }
 
- const fetchClients = async (idUser: number) => {
-    return await fetch(`http://localhost:3000/clients/${idUser}`)
-    .then(res => {
-        if(!res.ok) throw new Error("Error fetching")
-        return res.json()
-    })
+const fetchClients = async (idUser: number) => {
+  return await fetch(`http://localhost:3000/clients/${idUser}`)
+  .then(res => {
+      if(!res.ok) throw new Error("Error fetching")
+      return res.json()
+  })
 }
 
+const fetchAddNewClient = async (idUser: number, values: DataType): Promise<DataType> => {
+  return await fetch(`http://localhost:3000/clients/${idUser}`, {
+    method: "POST",
+    headers: {
+      'Content-Type' : 'application/json',
+    },
+    body: JSON.stringify(values)
+  })
+  .then(res => {
+    if(!res.ok) throw new Error("Client add failed")
+    return res.json()
+  })
+}
+
+const fetchEditClient = async (idUser: number, values: DataType): Promise<DataType> => {
+  return await fetch(`http://localhost:3000/clients/${idUser}`, {
+    method: "PATCH",
+    headers: {
+      'Content-Type' : 'application/json',
+    },
+    body: JSON.stringify(values)
+  })
+  .then(res => {
+    if(!res.ok) throw new Error("Client edit failed")
+    return res.json()
+  })
+}
+
+const fetchUpdateCleanToday = async (idUser: number, arrayIds: Key[]): Promise<void> => {
+  return await fetch(`http://localhost:3000/clients/cleantoday/${idUser}`, {
+    method: "PATCH",
+    headers: {
+      'Content-Type' : 'application/json',
+    },
+    body: JSON.stringify(arrayIds)
+  })
+  .then(res => {
+    if(!res.ok) throw new Error("Can't add clients to CleanToday")
+    return res.json()
+  })
+}
+
+const idUser = 1
+
 export const Clients = () => {
-  const {isLoading, isError, data} = useQuery<DataType[]>(
+  const {isLoading, isError, data, refetch: refetchClients} = useQuery<DataType[]>(
     {
       queryKey: ['clients'],
-      queryFn: async () => await fetchClients(17)
+      queryFn: async () => await fetchClients(idUser)
     }
   )
   const [openModal, setOpenModal] = useState<boolean>(false)
@@ -39,6 +83,7 @@ export const Clients = () => {
   const [clientSelected, setClientSelected] = useState<DataType[]>([])
   const [openModalDeleteClient, setOpenModalDeleteClient] = useState<boolean>(false)
   const [openModalEditClient, setOpenModalEditClient] = useState<boolean>(false)
+  const [messageApi, contextHolder] = message.useMessage();
 
   const ClientsColums: columnsType[] = [
     {
@@ -77,21 +122,52 @@ export const Clients = () => {
     }
   }
 
-  const handleFinish = (type : "add" | "edit") => {
-    openModal && setOpenModal(false)
-    openModalEditClient && setOpenModalEditClient(false)
-    setRowsSelected([])
-    type === 'add' 
-    ? message.open({
-      type: 'success',
-      content: 'Add new client'
-    })
-    : message.open({
-      type: 'success',
-      content:"client edited successfully"
-    })
-  }
+  const addClientMutation = useMutation({
+    mutationFn: (values: DataType) => fetchAddNewClient(idUser, values),
+    onSuccess: () => {
+      message.success('Client added successfully!');
+      setOpenModal(false);
+      setRowsSelected([]);
+      refetchClients()
+    },
+    onError: () => {
+      message.error('Failed to add client.');
+    }
+  });
 
+  const editClientMutation = useMutation({
+    mutationFn: (values: DataType) => fetchEditClient(idUser, values),
+    onSuccess: () => {
+      message.success('Client added successfully!');
+      setOpenModalEditClient(false);
+      setRowsSelected([]);
+      refetchClients()
+    },
+    onError: () => {
+      message.error('Failed to add client.');
+    }  
+  })
+
+  const updateCleanTodayMutation = useMutation({
+    mutationFn: async (arrayIds: Key[]) => fetchUpdateCleanToday(idUser, arrayIds),
+    onSuccess: () => {
+      message.success('Client added to "Clean Today" succesfully!');
+      setOpenModalEditClient(false);
+      setRowsSelected([]);
+      refetchClients()
+    },
+    onError: () => {
+      message.error('Failed to add clients. Check that you have not added them previously');
+    }  
+  })
+
+  const handleFinish = (values: DataType, type: 'add' | 'edit') => {
+    if (type === 'add') {
+      addClientMutation.mutate(values);
+    } else {
+      editClientMutation.mutate(values)
+    }
+  };
   const handleDeleteClient = () => {
     setOpenModalDeleteClient(true)
     console.log(clientSelected)
@@ -108,13 +184,9 @@ export const Clients = () => {
   }
 
   const handleClickToday = (rowsSelected: Key[]): void => {
-    console.log("Clean Today", rowsSelected)
+    updateCleanTodayMutation.mutate(rowsSelected)
     setClientSelected([])
     setRowsSelected([])
-    message.open({
-      type: 'success',
-      content: `${rowsSelected.length} clients added to "Clean Today"`
-    })
   }
 
   const handleClickTomorrow = (rowsSelected: Key[]): void => {
@@ -166,7 +238,7 @@ export const Clients = () => {
           style={{margin: "20px"}}
           onClick={() => setOpenModal(true)}>Add 
           </Button>
-          <AddClientModal openModal={openModal} OnFinish={() => handleFinish('add')} onCancel={handleCancel} />
+          <AddClientModal openModal={openModal} onFinish={handleFinish} onCancel={handleCancel} />
         </>
       }
 
@@ -186,7 +258,7 @@ export const Clients = () => {
         onCloseModalDeleteClient={handleCloseModalDeleteClient}/>
       <EditClientModal 
       openModalEditClient={openModalEditClient} 
-      OnFinish={() => handleFinish('edit')} 
+      OnFinish={handleFinish} 
       onCancel={handleCancel}
       clientSelected={clientSelected}/>
     </div>

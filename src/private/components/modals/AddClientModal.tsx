@@ -1,9 +1,10 @@
 import { Button, Col, Form, Input, InputNumber, Modal, Row, Select, Typography } from 'antd'
+import { DataType } from '../../pages/Clients'
 
 const {Title} = Typography
 
-export type Values = {
-    fullname: string
+export type formType = {
+    name: string
     neighborhood: string
     price: number
     periodicity: "weekly" | "biweekly" | "monthly"
@@ -13,15 +14,15 @@ export type Values = {
 
 type Props = {
     openModal: boolean
-    OnFinish: () => void
+    onFinish: (formData: DataType, type: "add") => void
     onCancel: () => void
 }
 
-export const AddClientModal = ({openModal, OnFinish, onCancel }: Props) => {
+export const AddClientModal = ({openModal, onFinish, onCancel }: Props) => {
     const [form] = Form.useForm()
 
-    const handleFinish = (): void => {
-        OnFinish()
+    const handleFinish = (values: DataType): void => {
+        onFinish(values, "add")
         form.resetFields()
     }
 
@@ -37,7 +38,7 @@ export const AddClientModal = ({openModal, OnFinish, onCancel }: Props) => {
           layout="vertical"
           onFinish={handleFinish}>
               <Form.Item
-              name={"fullName"}
+              name={"name"}
               label={"Full Name"}
               rules={[{required: true, message: "Full name es require"}]}>
                   <Input placeholder="Write full name"/>

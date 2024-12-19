@@ -1,10 +1,11 @@
 import { Button, Col, Form, Input, InputNumber, Modal, Row, Select, Typography } from 'antd'
 import { DataType } from '../../pages/Clients'
+import { useEffect } from 'react'
 
 const {Title} = Typography
 
-export type Values = {
-    fullname: string
+export type editType = {
+    name: string
     neighborhood: string
     price: number
     periodicity: "weekly" | "biweekly" | "monthly"
@@ -14,7 +15,7 @@ export type Values = {
 
 type Props = {
     openModalEditClient: boolean
-    OnFinish: () => void
+    OnFinish: (values: DataType, type: "edit") => void
     onCancel: () => void
     clientSelected: DataType[]
 }
@@ -22,10 +23,28 @@ type Props = {
 export const EditClientModal = ({openModalEditClient, OnFinish, onCancel, clientSelected}: Props) => {
     const [form] = Form.useForm()
     const client = clientSelected[0]
-    const handleFinish = (): void => {
-        OnFinish()
+    const handleFinish = (val: editType): void => {
+        const id = client.id
+        const values: DataType = {...val, id}
+        console.log(values)
+        OnFinish(values, "edit")
         form.resetFields()
     }
+
+    useEffect(() => {
+        if(client) {
+            form.setFieldsValue(
+              {
+                  name: client.name,
+                  price: client.price,
+                  neighborhood: client.neighborhood,
+                  periodicity: client.periodicity,
+                  phoneNumber: client.phoneNumber
+              })
+        }
+    
+    }, [client, form])
+    
 
   return (
     <>
@@ -39,16 +58,9 @@ export const EditClientModal = ({openModalEditClient, OnFinish, onCancel, client
               <Form
               form={form}
               layout="vertical"
-              onFinish={handleFinish}
-              initialValues={{
-                fullName: client.name,
-                price: client.price,
-                neighborhood: client.neighborhood,
-                periodicity: client.periodicity,
-                phoneNumber: client.phone
-              }}>
+              onFinish={handleFinish}>
                   <Form.Item
-                  name={"fullName"}
+                  name={"name"}
                   label={"Full Name"}
                   rules={[{required: true, message: "Full name es require"}]}>
                       <Input placeholder="Write full name" onClick={() => console.log(client.name)}/>
