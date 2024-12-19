@@ -25,7 +25,6 @@ export type DataType = {
         if(!res.ok) throw new Error("Error fetching")
         return res.json()
     })
-    .then(res => res)
 }
 
 export const Clients = () => {
@@ -40,40 +39,6 @@ export const Clients = () => {
   const [clientSelected, setClientSelected] = useState<DataType[]>([])
   const [openModalDeleteClient, setOpenModalDeleteClient] = useState<boolean>(false)
   const [openModalEditClient, setOpenModalEditClient] = useState<boolean>(false)
-  const DataClient: DataType[] = [
-    {
-      id: 1 ,
-      name: "maria",
-      neighborhood: "4 hojas" ,
-      price: 12000,
-      periodicity: 7 ,
-      phoneNumber: "3512661510",
-    },
-    {
-      id:2 ,
-      name: "maria",
-      neighborhood: "4 hojas" ,
-      price: 12000,
-      periodicity: 7 ,
-      phone: "3512661510",
-    },
-    {
-      key:3 ,
-      name: "carla" ,
-      neighborhood: "catalina",
-      price: 10000,
-      periodicity: 15,
-      phone: "351486516",
-    },
-    {
-      key: 4 ,
-      name: "maria",
-      neighborhood: "4 hojas" ,
-      price: 12000,
-      periodicity: 7 ,
-      phone: "3512661510",
-    }
-  ]
 
   const ClientsColums: columnsType[] = [
     {

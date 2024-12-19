@@ -5,10 +5,9 @@ import { CarryOutOutlined, DollarOutlined } from "@ant-design/icons"
 import { Key, useState } from "react"
 import { AffixPoolFinished } from "../components/modals/AffixPoolFinished"
 import { DeleteNonPayment } from "../components/modals/DeleteNonPayment"
+import { useQuery } from "@tanstack/react-query"
 
 const { Title, Text} = Typography
-
-type Props = {}
 
 export type columnsType = {
     title: string
@@ -16,143 +15,45 @@ export type columnsType = {
     key: string
 }
 
-type dataColumnsType = {
-    key: string
-    name: string,
-    neighborhood: string,
-    price: number,
-    status: boolean
+type ClientsType = {
+    id: number; 
+    name: string;
+    neighborhood: string;
+    price: number;
+    periodicity: number;
+    CleanToday: boolean
+    CleanTomorrow: boolean
+    phoneNumber: string;
 }
 
-export const HomePage  = (props: Props) => {
+const fetchNotPayments = async (userId: number): Promise<NonPayment[]> => {
+    return await fetch(`http://localhost:3000/payments/notpayments/${userId}`)
+    .then(res => {
+        if(!res.ok) throw new Error("Payments loading error")
+        return res.json()
+    })
+}
+
+const fetchClients = async (userId: number): Promise<ClientsType[]> => {
+    return await fetch(`http://localhost:3000/clients/cleantoday/${userId}`)
+    .then(res => {
+        if(!res.ok) throw new Error("Clients loading error")
+        return res.json()
+    })
+}
+
+export const HomePage  = () => {
+    const {isError: ErrorNonPayments, refetch, isLoading, data: dataNonPayments} = useQuery({
+        queryKey: ['notPayments'],
+        queryFn: async () => fetchNotPayments(17)
+    })
+
+    const {isError: ErrorClients, refetch: refetchClient, isLoading: LoadingClients, data: dataClients  } = useQuery({
+        queryKey: ['clients'],
+        queryFn: async () => fetchClients(17)
+    })
     const [RowSelected, setRowSelected] = useState<Key[]>([])
     const [check, setCheck] = useState<number[]>([])
-
-    const [dataClients, setDataClient] = useState <dataColumnsType[]> ([
-        {
-            key: "1",
-            name: "Nicolas",
-            neighborhood: "4 hojas",
-            price: 15000,
-            status: false
-        },
-        {
-            key: "2",
-            name: "jaun",
-            neighborhood: "4 hojas",
-            price: 15000,
-            status: false
-        },
-        {
-            key: "3",
-            name: "Mateo",
-            neighborhood: "4 hojas",
-            price: 15000,
-            status: false
-        },
-        {
-            key: "4",
-            name: "Mateo",
-            neighborhood: "4 hojas",
-            price: 15000,
-            status: false
-        },
-        {
-            key: "5",
-            name: "Mateo",
-            neighborhood: "4 hojas",
-            price: 15000,
-            status: false
-        },
-        {
-            key: "6",
-            name: "Mateo",
-            neighborhood: "4 hojas",
-            price: 15000,
-            status: false
-        },
-        {
-            key: "7",
-            name: "Mateo",
-            neighborhood: "4 hojas",
-            price: 15000,
-            status: false
-        },
-        {
-            key: "8",
-            name: "Mateo",
-            neighborhood: "4 hojas",
-            price: 15000,
-            status: false
-        },
-        {
-            key: "9",
-            name: "Mateo",
-            neighborhood: "4 hojas",
-            price: 15000,
-            status: false
-        },
-        {
-            key: "10",
-            name: "Mateo",
-            neighborhood: "4 hojas",
-            price: 15000,
-            status: true
-        },
-        {
-            key: "11",
-            name: "Mateo",
-            neighborhood: "4 hojas",
-            price: 15000,
-            status: true
-        }
-    ])
-
-    const [DataNonPayments, setDataNonPayments] = useState<NonPayment[]>([
-        {
-            key: 1,
-            name: "juan",
-            neighborhood: "a",
-            date: "10/05",
-            price: 9500,
-        },
-        {
-            key: 2,
-            name: "pedro",
-            neighborhood: "aut",
-            date: "12/05",
-            price: 12000,
-        },
-        {
-            key: 3,
-            name: "carla",
-            neighborhood: "aut",
-            date: "14/05",
-            price: 15000,
-        },
-        {
-            key: 4,
-            name: "carla",
-            neighborhood: "aut",
-            date: "14/05",
-            price: 15000,
-        },
-        {
-            key: 5,
-            name: "carla",
-            neighborhood: "aut",
-            date: "14/05",
-            price: 15000,
-        },
-        {
-            key: 6,
-            name: "carla",
-            neighborhood: "aut",
-            date: "14/05",
-            price: 15000,
-        }
-    ])
-  
 
     const clientsColumns : columnsType[] = [
         {
@@ -182,16 +83,24 @@ export const HomePage  = (props: Props) => {
 
     const handleCheck = (check: number[]): void => {
         setCheck(check)
+        console.log(check)
     }
 
-    const handleClicDelete = () => {
-        for( const nonPayment of check) {
-             setDataNonPayments((prev) => {
-                return prev.filter(e => e.key !== nonPayment)
-             })
-        }
-        setCheck([])
+    const handleClicDelete = async (idUser: number, check: number[]) => {
+        await fetch(`http://localhost:3000/payments/${idUser}`, {
+            method: "PATCH",
+            headers: {
+                'Content-Type': 'application/json', 
+            },
+            body: JSON.stringify({check})
+        })
+        .then(res => {
+            if(!res.ok) throw new Error("change payment error")
+            return res.json
+        })
         console.log("elementos borrados")
+        setCheck([])
+        refetch()
  
      }
 
@@ -220,7 +129,7 @@ export const HomePage  = (props: Props) => {
                                     <Flex wrap gap={"small"} justify="space-around" align="center">
                                         <Text 
                                             style={{fontSize: "2rem", fontWeight: 700, color: "#e7f0f9"}}> 
-                                            5 
+                                            {dataClients?.length}
                                         </Text>
                                         <Progress type={"circle"} percent={25} size={45} format={(Percent)=> (
                                             <span style={{color: "white", fontWeight: "bold"}}>{Percent}%</span>
@@ -248,7 +157,7 @@ export const HomePage  = (props: Props) => {
                                         </Flex>
                                     <Text 
                                         style={{fontSize: "2rem", fontWeight: 700, color: "#e7f0f9"}}> 
-                                        $50000
+                                        $ {dataClients?.reduce((sum, client) => sum + client.price, 0)}
                                     </Text>
                                 </Card>
                             </Row>
@@ -261,7 +170,10 @@ export const HomePage  = (props: Props) => {
                 >
                 <Col xs={24} md={12}>
                 <Title level={2}>Pools of the Day</Title>
+                {(dataClients || LoadingClients) && 
                 <Table 
+                    rowKey={"id"}
+                    loading={LoadingClients}
                     columns={clientsColumns} 
                     dataSource={dataClients} 
                     rowSelection={rowSelection}
@@ -270,10 +182,21 @@ export const HomePage  = (props: Props) => {
                     rowClassName={(_, index) => (index % 2 === 0 ? "even-row" : "odd-row")}
                     style={{boxShadow: "1px 1px 5px black", overflow: "hidden", borderRadius: "10px"}}
                     />
+                }
+                {ErrorClients && 
+                <>
+                <Title level={4}> Client Loading Error</Title>
+                </>}
                 </Col>
                 <Col xs={24} md={12}>
                     <Title level={2}>Non Payments</Title>
-                    <NonPayment onCheck={handleCheck} DataNonPayments={DataNonPayments}/>
+                    <NonPayment onCheck={handleCheck} DataNonPayments={dataNonPayments} loading={isLoading}/>
+                    {ErrorNonPayments && 
+                    <>
+                        <Title level={4}style={{textAlign:"center"}}>
+                            Payments Loading Error
+                        </Title>
+                    </>}
                 </Col>
             </Row>
             { 
@@ -283,7 +206,7 @@ export const HomePage  = (props: Props) => {
             }
             {
             check.length > 0 && RowSelected.length === 0 && (
-                <DeleteNonPayment handleClic={handleClicDelete} />
+                <DeleteNonPayment handleClic={() => handleClicDelete(17, check)}/>
             )
             }
     </div>
