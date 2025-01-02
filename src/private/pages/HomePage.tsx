@@ -218,7 +218,7 @@ export const HomePage  = () => {
             }
             {
             check.length > 0 && RowSelected.length === 0 && (
-                <DeleteNonPayment handleClic={() => handleClicDelete(17, check)}/>
+                <DeleteNonPayment handleClic={() => handleClicDelete(1, check)}/>
             )
             }
     </div>

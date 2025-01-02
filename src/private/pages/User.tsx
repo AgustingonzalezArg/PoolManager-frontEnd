@@ -21,7 +21,7 @@ const monthNames = [
     console.log(check)
   }
 
-  const {isError: ErrorNonPayments, refetch, isLoading, data: dataPayments} = useQuery({
+  const {isError: ErrorNonPayments, refetch, isLoading, data: dataNonPayments} = useQuery({
     queryKey: ['notPayments'],
     queryFn: async () => fetchNotPayments(1)
 })
@@ -38,7 +38,7 @@ const monthNames = [
                 </div>
                 <div>
                   <Title level={3} style={{ fontSize: "1rem" }}>{monthNames[new Date().getMonth()]}</Title>
-                  <Text style={{ fontSize: "1.3rem", fontWeight: "bold" }}>${dataNonPayments?.reduce((no))}</Text>
+                  <Text style={{ fontSize: "1.3rem", fontWeight: "bold" }}>${560000}</Text>
                 </div>
               </Flex>
             </Card>
@@ -72,14 +72,20 @@ const monthNames = [
           <Col span={23} offset={1}>
             <Title level={3}>Non Payments</Title>
           </Col>
-          { dataPayments?.length === 0 ? 
+          { dataNonPayments?.length === 0 && !ErrorNonPayments &&
           <Col xs={{span: 20, offset: 2}} sm={{span: 20, offset: 2}} lg={{span:18, offset: 2}}>
             <Title level={4} style={{}}> All your pools charged! Excelent</Title>
           </Col>
-          :
+          }
+          { dataNonPayments?.length > 0 && !ErrorNonPayments &&
           <Col xs={{span: 24}} sm={{span: 20, offset: 2}} lg={{span:18, offset: 2}}>
             <NonPayment onCheck={handleCheck} DataNonPayments={dataNonPayments} loading={isLoading}/>
           </Col>
+          }
+          {ErrorNonPayments &&
+            <Col xs={{span: 20, offset: 1}} sm={{span: 20, offset: 2}} lg={{span:18, offset: 2}}>
+             <Title level={4}> Non payments error </Title>
+            </Col>
           }
         </Row>
 
