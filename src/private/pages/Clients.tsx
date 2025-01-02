@@ -6,7 +6,8 @@ import { AddClientModal } from '../components/modals/AddClientModal'
 import { OptionsClientModal } from '../components/modals/OptionsClientModal'
 import { DeleteClientModal } from '../components/modals/DeleteClientModal'
 import { EditClientModal } from '../components/modals/EditClientModal'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { fetchAddNewClient, fetchClients, fetchEditClient, fetchUpdateCleanToday, fetchUpdateTomorrowToday } from '../fetchs/Client.ts'
 
 const { Title } = Typography
 
@@ -19,63 +20,14 @@ export type DataType = {
   phoneNumber: string
 }
 
-const fetchClients = async (idUser: number) => {
-  return await fetch(`http://localhost:3000/clients/${idUser}`)
-  .then(res => {
-      if(!res.ok) throw new Error("Error fetching")
-      return res.json()
-  })
-}
-
-const fetchAddNewClient = async (idUser: number, values: DataType): Promise<DataType> => {
-  return await fetch(`http://localhost:3000/clients/${idUser}`, {
-    method: "POST",
-    headers: {
-      'Content-Type' : 'application/json',
-    },
-    body: JSON.stringify(values)
-  })
-  .then(res => {
-    if(!res.ok) throw new Error("Client add failed")
-    return res.json()
-  })
-}
-
-const fetchEditClient = async (idUser: number, values: DataType): Promise<DataType> => {
-  return await fetch(`http://localhost:3000/clients/${idUser}`, {
-    method: "PATCH",
-    headers: {
-      'Content-Type' : 'application/json',
-    },
-    body: JSON.stringify(values)
-  })
-  .then(res => {
-    if(!res.ok) throw new Error("Client edit failed")
-    return res.json()
-  })
-}
-
-const fetchUpdateCleanToday = async (idUser: number, arrayIds: Key[]): Promise<void> => {
-  return await fetch(`http://localhost:3000/clients/cleantoday/${idUser}`, {
-    method: "PATCH",
-    headers: {
-      'Content-Type' : 'application/json',
-    },
-    body: JSON.stringify(arrayIds)
-  })
-  .then(res => {
-    if(!res.ok) throw new Error("Can't add clients to CleanToday")
-    return res.json()
-  })
-}
-
 const idUser = 1
 
 export const Clients = () => {
   const {isLoading, isError, data, refetch: refetchClients} = useQuery<DataType[]>(
     {
       queryKey: ['clients'],
-      queryFn: async () => await fetchClients(idUser)
+      queryFn: async () => await fetchClients(idUser),
+      staleTime: 0
     }
   )
   const [openModal, setOpenModal] = useState<boolean>(false)
@@ -83,8 +35,6 @@ export const Clients = () => {
   const [clientSelected, setClientSelected] = useState<DataType[]>([])
   const [openModalDeleteClient, setOpenModalDeleteClient] = useState<boolean>(false)
   const [openModalEditClient, setOpenModalEditClient] = useState<boolean>(false)
-  const [messageApi, contextHolder] = message.useMessage();
-
   const ClientsColums: columnsType[] = [
     {
       title: "Name",
@@ -161,6 +111,19 @@ export const Clients = () => {
     }  
   })
 
+  const updateCleanTomorrowMutation = useMutation({
+    mutationFn: async (arrayIds: Key[]) => fetchUpdateTomorrowToday(idUser, arrayIds),
+    onSuccess: () => {
+      message.success('Client added to "Clean Tomorrow" succesfully!');
+      setOpenModalEditClient(false);
+      setRowsSelected([]);
+      refetchClients()
+    },
+    onError: () => {
+      message.error('Failed to add clients. Check that you have not added them previously');
+    }  
+  })
+
   const handleFinish = (values: DataType, type: 'add' | 'edit') => {
     if (type === 'add') {
       addClientMutation.mutate(values);
@@ -168,19 +131,16 @@ export const Clients = () => {
       editClientMutation.mutate(values)
     }
   };
+
   const handleDeleteClient = () => {
     setOpenModalDeleteClient(true)
-    console.log(clientSelected)
   }
 
   const handleCloseModalDeleteClient = (): void => {
     setOpenModalDeleteClient(false)
     setClientSelected([])
     setRowsSelected([])
-    message.open({
-      type: 'success',
-      content: 'Client deleted successfully'
-    })
+
   }
 
   const handleClickToday = (rowsSelected: Key[]): void => {
@@ -190,13 +150,9 @@ export const Clients = () => {
   }
 
   const handleClickTomorrow = (rowsSelected: Key[]): void => {
-    console.log("Clean Tomorrow", rowsSelected)
+    updateCleanTomorrowMutation.mutate(rowsSelected)
     setClientSelected([])
     setRowsSelected([])
-    message.open({
-      type: 'success',
-      content: `${rowsSelected.length} clients added to "Clean Tomorrow"`
-    })
   }
 
   const handleCancel = (): void => {

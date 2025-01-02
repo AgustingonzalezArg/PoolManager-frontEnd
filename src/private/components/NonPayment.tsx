@@ -17,7 +17,7 @@ export type NonPayment = {
 
 type Props = {
     onCheck: (val: number[]) => void
-    DataNonPayments: NonPayment[]
+    DataNonPayments: NonPayment[] | undefined
     loading: boolean
 }
 

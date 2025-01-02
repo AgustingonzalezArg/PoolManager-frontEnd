@@ -1,5 +1,6 @@
-import { Button, Col, Modal, Row } from "antd"
+import { Button, Col, message, Modal, Row } from "antd"
 import { DataType } from "../../pages/Clients"
+import { useMutation } from "@tanstack/react-query"
 
 
 type Props = {
@@ -8,11 +9,33 @@ type Props = {
     onCloseModalDeleteClient: () => void
 }
 
+const fetchDeleteClient =async  (idUser: number, id: number) => {
+    return await fetch(`http://localhost:3000/clients/${idUser}/${id}`,{
+        method: "DELETE"
+    })
+    .then(res => {
+        if(!res.ok) throw new Error("Can't delete client")
+        return res.json()
+      })
+}
+
+const idUser = 1
+
 export const DeleteClientModal = ({clientSelected, OpenModalDeleteClient, onCloseModalDeleteClient}: Props) => {
+
+    const deleteClientMutation = useMutation({
+        mutationFn: async (id: number) => await fetchDeleteClient(idUser, id),
+        onSuccess: () => {
+            message.success('Client deleted')
+        },
+        onError: () => {
+            message.error("Can't deleted Client")
+        }
+    })
 
     const handleDeleteClient = (clientSelected: DataType) => {
         onCloseModalDeleteClient()
-        console.log("client deleted: " + clientSelected.name)
+        deleteClientMutation.mutate(clientSelected.id)
     }
 
   return (

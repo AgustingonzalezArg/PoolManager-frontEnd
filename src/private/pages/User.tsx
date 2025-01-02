@@ -1,12 +1,30 @@
 import { Card, Col, Flex, Progress, Row, Typography } from "antd"
 import { NonPayment } from "../components/NonPayment"
 import { InfoCircleFilled, LineChartOutlined } from "@ant-design/icons"
+import { useState } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { fetchNotPayments } from "../service/tanstackQuery"
 const {Title, Text} = Typography
 
 
 type Props = {}
 
 export const User = (props: Props) => {
+const [check, setCheck] = useState<number[]>([])
+const monthNames = [
+  'January', 'February', 'March', 'April', 'May', 'June', 
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+  const handleCheck = (check: number[]): void => {
+    setCheck(check)
+    console.log(check)
+  }
+
+  const {isError: ErrorNonPayments, refetch, isLoading, data: dataPayments} = useQuery({
+    queryKey: ['notPayments'],
+    queryFn: async () => fetchNotPayments(1)
+})
   return (
     <div>
       <Title style={{textAlign: "center", padding: "15px"}}>User</Title>
@@ -19,8 +37,8 @@ export const User = (props: Props) => {
                   <Title level={2} style={{ fontSize: "1.3rem" }}>Earnings</Title>
                 </div>
                 <div>
-                  <Title level={3} style={{ fontSize: "1rem" }}>Noviembre</Title>
-                  <Text style={{ fontSize: "1.3rem", fontWeight: "bold" }}>$650000</Text>
+                  <Title level={3} style={{ fontSize: "1rem" }}>{monthNames[new Date().getMonth()]}</Title>
+                  <Text style={{ fontSize: "1.3rem", fontWeight: "bold" }}>${dataNonPayments?.reduce((no))}</Text>
                 </div>
               </Flex>
             </Card>
@@ -54,9 +72,15 @@ export const User = (props: Props) => {
           <Col span={23} offset={1}>
             <Title level={3}>Non Payments</Title>
           </Col>
-          <Col xs={{span: 24}} sm={{span: 20, offset: 2}} lg={{span:18, offset: 1}}>
-            <NonPayment/>
+          { dataPayments?.length === 0 ? 
+          <Col xs={{span: 20, offset: 2}} sm={{span: 20, offset: 2}} lg={{span:18, offset: 2}}>
+            <Title level={4} style={{}}> All your pools charged! Excelent</Title>
           </Col>
+          :
+          <Col xs={{span: 24}} sm={{span: 20, offset: 2}} lg={{span:18, offset: 2}}>
+            <NonPayment onCheck={handleCheck} DataNonPayments={dataNonPayments} loading={isLoading}/>
+          </Col>
+          }
         </Row>
 
   

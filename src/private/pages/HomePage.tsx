@@ -2,10 +2,12 @@ import { Card, Col, Flex, Progress, Row, Table, TableProps, Typography } from "a
 import "../../index.css"
 import { NonPayment } from "../components/NonPayment"
 import { CarryOutOutlined, DollarOutlined } from "@ant-design/icons"
-import { Key, useState } from "react"
+import { Key, useEffect, useState } from "react"
 import { AffixPoolFinished } from "../components/modals/AffixPoolFinished"
 import { DeleteNonPayment } from "../components/modals/DeleteNonPayment"
 import { useQuery } from "@tanstack/react-query"
+import { fetchNotPayments } from "../service/tanstackQuery"
+import { da } from "date-fns/locale"
 
 const { Title, Text} = Typography
 
@@ -26,14 +28,6 @@ type ClientsType = {
     phoneNumber: string;
 }
 
-const fetchNotPayments = async (userId: number): Promise<NonPayment[]> => {
-    return await fetch(`http://localhost:3000/payments/notpayments/${userId}`)
-    .then(res => {
-        if(!res.ok) throw new Error("Payments loading error")
-        return res.json()
-    })
-}
-
 const fetchClients = async (userId: number): Promise<ClientsType[]> => {
     return await fetch(`http://localhost:3000/clients/cleantoday/${userId}`)
     .then(res => {
@@ -43,14 +37,20 @@ const fetchClients = async (userId: number): Promise<ClientsType[]> => {
 }
 
 export const HomePage  = () => {
-    const {isError: ErrorNonPayments, refetch, isLoading, data: dataNonPayments} = useQuery({
+    const {isError: ErrorNonPayments, refetch, isLoading, data: dataNonPayments,} = useQuery({
         queryKey: ['notPayments'],
-        queryFn: async () => fetchNotPayments(17)
+        queryFn: async () => fetchNotPayments(1),
     })
+
+    useEffect(() => {
+      if(!ErrorNonPayments) console.log(dataNonPayments)
+    
+    }, [ErrorNonPayments])
+    
 
     const {isError: ErrorClients, refetch: refetchClient, isLoading: LoadingClients, data: dataClients  } = useQuery({
         queryKey: ['clients'],
-        queryFn: async () => fetchClients(17)
+        queryFn: async () => fetchClients(1)
     })
     const [RowSelected, setRowSelected] = useState<Key[]>([])
     const [check, setCheck] = useState<number[]>([])
@@ -73,13 +73,12 @@ export const HomePage  = () => {
         }
     ]
 
-    const rowSelection: TableProps<DataType>['rowSelection'] = {
+    const rowSelection: TableProps<ClientsType>['rowSelection'] = {
         selectedRowKeys: RowSelected,
-        onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
+        onChange: (selectedRowKeys: React.Key[], selectedRows: ClientsType[]) => {
             setRowSelected(selectedRowKeys)
         }
       };
-      
 
     const handleCheck = (check: number[]): void => {
         setCheck(check)
@@ -190,13 +189,26 @@ export const HomePage  = () => {
                 </Col>
                 <Col xs={24} md={12}>
                     <Title level={2}>Non Payments</Title>
-                    <NonPayment onCheck={handleCheck} DataNonPayments={dataNonPayments} loading={isLoading}/>
+
                     {ErrorNonPayments && 
                     <>
                         <Title level={4}style={{textAlign:"center"}}>
                             Payments Loading Error
                         </Title>
                     </>}
+                    {
+                        dataNonPayments?.length === 0 ? 
+                        <Col>
+                            <Title level={4} style={{}}> All your pools charged! Excelent</Title>
+                        </Col>
+                        :
+                        <NonPayment onCheck={handleCheck} DataNonPayments={dataNonPayments} loading={isLoading}/>
+                    }
+                    <>
+                        <Title level={4}style={{textAlign:"center"}}>
+                            Payments Loading Error
+                        </Title>
+                    </>
                 </Col>
             </Row>
             { 
