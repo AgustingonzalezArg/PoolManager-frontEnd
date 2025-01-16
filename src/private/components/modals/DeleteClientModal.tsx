@@ -7,6 +7,7 @@ type Props = {
     clientSelected: DataType[]
     OpenModalDeleteClient: boolean
     onCloseModalDeleteClient: () => void
+    onRefetchClientList: () => void
 }
 
 const fetchDeleteClient =async  (idUser: number, id: number) => {
@@ -21,12 +22,13 @@ const fetchDeleteClient =async  (idUser: number, id: number) => {
 
 const idUser = 1
 
-export const DeleteClientModal = ({clientSelected, OpenModalDeleteClient, onCloseModalDeleteClient}: Props) => {
+export const DeleteClientModal = ({clientSelected, OpenModalDeleteClient, onCloseModalDeleteClient, onRefetchClientList}: Props) => {
 
     const deleteClientMutation = useMutation({
         mutationFn: async (id: number) => await fetchDeleteClient(idUser, id),
         onSuccess: () => {
             message.success('Client deleted')
+            onRefetchClientList()
         },
         onError: () => {
             message.error("Can't deleted Client")

@@ -18,6 +18,23 @@
   cursor: pointer;
 }
 
+.disable-row {
+  pointer-events: none;
+  opacity: 0.5;
+  position: relative;
+}
+
+.disable-row::after {
+  content: "";
+  position: absolute; 
+  top: 50%; /* Coloca la línea en el centro de la fila */
+  left: 0;
+  width: 100%;
+  height: 1px; /* Grosor de la línea */
+  background-color: #57c25c; /* Color de la línea */
+  z-index: 1; /* Asegura que la línea esté sobre el fondo pero debajo del texto */
+}
+
 .ant-table-tbody > tr >td {
   color: #303030 !important;
 }
@@ -28,4 +45,11 @@
 
 .ant-table-row-selected {
   background-color: #e6f7ff !important; /* Color de fondo personalizado */
+}
+
+.hover_DeleteFilled:hover {
+  color: #ff0000 !important;
+  transition: color ease-in .1s;
+  transition: transform ease-in .15s; 
+  transform: scale(1.2);
 }

@@ -1,58 +1,32 @@
 import { Card, Checkbox, Flex, List, Typography } from "antd"
-import { columnsType } from "../pages/HomePage"
 import { UserOutlined } from "@ant-design/icons"
 import { useEffect, useState } from "react"
-import { DataType } from "../pages/Clients"
+import {  } from "../pages/Clients"
 import { format } from "date-fns"
+import { Payment } from "../fetchs/payment"
 
 const { Text } = Typography
 
-export type NonPayment = {
-    id: number
-    name: string
-    date: string
-    price: number
-    client: DataType
-}
-
 type Props = {
     onCheck: (val: number[]) => void
-    DataNonPayments: NonPayment[] | undefined
+    DataNonPayments: Payment[] | undefined
     loading: boolean
+    resetCheck: number
 }
 
-const NonPaymentsColumns: columnsType[] = [
-    {
-        title: "Name" ,
-        dataIndex: "name" ,
-        key: "name" ,
-    },
-    {
-        title: "Neighborhood",
-        dataIndex: "neighborhood",
-        key: "neighborhood",
-    },
-    {
-        title: "Date",
-        dataIndex: "date",
-        key: "date",
-    },
-    {
-        title: "Price",
-        dataIndex: "price",
-        key: "price",
-    },
-] 
-
-  export const NonPayment = ({onCheck, DataNonPayments, loading}: Props ) => {
-      
+  export const NonPayment = ({onCheck, DataNonPayments, loading, resetCheck}: Props ) => {
     const [check, setCheck] = useState<number[]>([])
-  
+
     useEffect(() => {
       onCheck(check)
 
     }, [check])
     
+    useEffect(() => {
+        setCheck([])
+    }, [resetCheck])
+    
+
     const handleCheckbox = (id: number) => {
         setCheck((prevcheck) => {
             if(prevcheck.includes(id)) {
@@ -63,6 +37,8 @@ const NonPaymentsColumns: columnsType[] = [
         })
       }
 
+
+    
       return (
     <div style={{maxHeight:"400px", overflowY: "auto"}}>
       <List

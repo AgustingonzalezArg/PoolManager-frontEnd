@@ -1,4 +1,4 @@
-import { CloseOutlined, HomeOutlined, MenuOutlined, UsergroupAddOutlined, UserOutlined } from '@ant-design/icons';
+import { CloseOutlined, DollarOutlined, HomeOutlined, MenuOutlined, UsergroupAddOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Drawer, Menu } from 'antd';
 import { useState, useEffect } from 'react';
 import { MenuProps } from 'antd/es/menu';
@@ -25,9 +25,9 @@ export const Nav = ({ screens }: Props) => {
       icon: <UsergroupAddOutlined />,
     },
     {
-      label: <Link to={"/user"}>User</Link>,
+      label: <Link to={"/user"}>Earnings</Link>,
       key: "user",
-      icon: <UserOutlined />,
+      icon: <DollarOutlined />,
     },
   ];
 

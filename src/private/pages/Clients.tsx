@@ -8,10 +8,11 @@ import { DeleteClientModal } from '../components/modals/DeleteClientModal'
 import { EditClientModal } from '../components/modals/EditClientModal'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchAddNewClient, fetchClients, fetchEditClient, fetchUpdateCleanToday, fetchUpdateTomorrowToday } from '../fetchs/Client.ts'
+import { CreatePayment, newPayment } from '../fetchs/payment.ts'
 
 const { Title } = Typography
 
-export type DataType = {
+export type Client = {
   id: number
   name: string
   neighborhood: string
@@ -23,7 +24,7 @@ export type DataType = {
 const idUser = 1
 
 export const Clients = () => {
-  const {isLoading, isError, data, refetch: refetchClients} = useQuery<DataType[]>(
+  const {isLoading, isError, data, refetch: refetchClients} = useQuery<Client[]>(
     {
       queryKey: ['clients'],
       queryFn: async () => await fetchClients(idUser),
@@ -32,7 +33,7 @@ export const Clients = () => {
   )
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [rowsSelected, setRowsSelected] = useState<Key[]>([])
-  const [clientSelected, setClientSelected] = useState<DataType[]>([])
+  const [clientSelected, setClientSelected] = useState<Client[]>([])
   const [openModalDeleteClient, setOpenModalDeleteClient] = useState<boolean>(false)
   const [openModalEditClient, setOpenModalEditClient] = useState<boolean>(false)
   const ClientsColums: columnsType[] = [
@@ -65,7 +66,7 @@ export const Clients = () => {
 
   const rowSelection = {
     selectedRowKeys: rowsSelected,
-    onChange: (selectedRowKeys: Key[], selectedRows: DataType[]) => {
+    onChange: (selectedRowKeys: Key[], selectedRows: Client[]) => {
       setRowsSelected(selectedRowKeys)
       setClientSelected(selectedRows)
       console.log(clientSelected)
@@ -73,7 +74,7 @@ export const Clients = () => {
   }
 
   const addClientMutation = useMutation({
-    mutationFn: (values: DataType) => fetchAddNewClient(idUser, values),
+    mutationFn: (values: Client) => fetchAddNewClient(idUser, values),
     onSuccess: () => {
       message.success('Client added successfully!');
       setOpenModal(false);
@@ -86,7 +87,7 @@ export const Clients = () => {
   });
 
   const editClientMutation = useMutation({
-    mutationFn: (values: DataType) => fetchEditClient(idUser, values),
+    mutationFn: (values: Client) => fetchEditClient(idUser, values),
     onSuccess: () => {
       message.success('Client added successfully!');
       setOpenModalEditClient(false);
@@ -98,33 +99,33 @@ export const Clients = () => {
     }  
   })
 
-  const updateCleanTodayMutation = useMutation({
-    mutationFn: async (arrayIds: Key[]) => fetchUpdateCleanToday(idUser, arrayIds),
-    onSuccess: () => {
-      message.success('Client added to "Clean Today" succesfully!');
-      setOpenModalEditClient(false);
-      setRowsSelected([]);
-      refetchClients()
-    },
-    onError: () => {
-      message.error('Failed to add clients. Check that you have not added them previously');
-    }  
-  })
+  // const updateCleanTodayMutation = useMutation({
+  //   mutationFn: async (arrayIds: Key[]) => fetchUpdateCleanToday(idUser, arrayIds),
+  //   onSuccess: () => {
+  //     message.success('Client added to "Clean Today" succesfully!');
+  //     setOpenModalEditClient(false);
+  //     setRowsSelected([]);
+  //     refetchClients()
+  //   },
+  //   onError: () => {
+  //     message.error('Failed to add clients. Check that you have not added them previously');
+  //   }  
+  // })
 
-  const updateCleanTomorrowMutation = useMutation({
-    mutationFn: async (arrayIds: Key[]) => fetchUpdateTomorrowToday(idUser, arrayIds),
-    onSuccess: () => {
-      message.success('Client added to "Clean Tomorrow" succesfully!');
-      setOpenModalEditClient(false);
-      setRowsSelected([]);
-      refetchClients()
-    },
-    onError: () => {
-      message.error('Failed to add clients. Check that you have not added them previously');
-    }  
-  })
+  // const updateCleanTomorrowMutation = useMutation({
+  //   mutationFn: async (arrayIds: Key[]) => fetchUpdateTomorrowToday(idUser, arrayIds),
+  //   onSuccess: () => {
+  //     message.success('Client added to "Clean Tomorrow" succesfully!');
+  //     setOpenModalEditClient(false);
+  //     setRowsSelected([]);
+  //     refetchClients()
+  //   },
+  //   onError: () => {
+  //     message.error('Failed to add clients. Check that you have not added them previously');
+  //   }  
+  // })
 
-  const handleFinish = (values: DataType, type: 'add' | 'edit') => {
+  const handleFinish = (values: Client, type: 'add' | 'edit') => {
     if (type === 'add') {
       addClientMutation.mutate(values);
     } else {
@@ -143,16 +144,46 @@ export const Clients = () => {
 
   }
 
-  const handleClickToday = (rowsSelected: Key[]): void => {
-    updateCleanTodayMutation.mutate(rowsSelected)
+  const handleClickToday = async (rowsSelected: Key[]): void => {
+    if(data){const filterClients = data.filter(client => rowsSelected.includes(client.id))
+    const dataNewPayments: CreatePayment[]= filterClients.map(client => ({
+      idClient: client.id,
+      price: client.price,
+      date: new Date(),
+      cleaning: false,
+      payment: false
+    }))
+    try {
+      await newPayment(1, dataNewPayments)
+      message.success("Client add 'Clean Today'")
+    } catch (error) {
+      message.error("Client could not be added to clean today")
+    }
     setClientSelected([])
     setRowsSelected([])
+    }
   }
 
-  const handleClickTomorrow = (rowsSelected: Key[]): void => {
-    updateCleanTomorrowMutation.mutate(rowsSelected)
-    setClientSelected([])
-    setRowsSelected([])
+  const handleClickTomorrow = async (rowsSelected: Key[]): void => {
+    if(data){const filterClients = data.filter(client => rowsSelected.includes(client.id))
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      const dataNewPayments: CreatePayment[]= filterClients.map(client => ({
+        idClient: client.id,
+        price: client.price,
+        date: tomorrow,
+        cleaning: false,
+        payment: false
+      }))
+      try {
+        await newPayment(1, dataNewPayments)
+        message.success("Client add 'Clean Tomorrow'")
+      } catch (error) {
+        message.error("Client could not be added to 'Clean Tomorrow'")
+      }
+      setClientSelected([])
+      setRowsSelected([])
+      }
   }
 
   const handleCancel = (): void => {
@@ -170,6 +201,13 @@ export const Clients = () => {
       {isError && <><Title level={4} style={{textAlign: "center"}}>Client loading Error </Title></>}
       {(data || isLoading) && 
         <>
+          <Button 
+          icon={<PlusOutlined />} 
+          iconPosition='end' 
+          type='primary'
+          style={{margin: "20px"}}
+          onClick={() => setOpenModal(true)}>Add 
+          </Button>
           <Row>
             <Col 
             span={20}
@@ -187,13 +225,6 @@ export const Clients = () => {
               rowSelection={rowSelection} />
             </Col>
           </Row>
-          <Button 
-          icon={<PlusOutlined />} 
-          iconPosition='end' 
-          type='primary'
-          style={{margin: "20px"}}
-          onClick={() => setOpenModal(true)}>Add 
-          </Button>
           <AddClientModal openModal={openModal} onFinish={handleFinish} onCancel={handleCancel} />
         </>
       }
@@ -211,7 +242,8 @@ export const Clients = () => {
       <DeleteClientModal 
         clientSelected={clientSelected} 
         OpenModalDeleteClient={openModalDeleteClient}
-        onCloseModalDeleteClient={handleCloseModalDeleteClient}/>
+        onCloseModalDeleteClient={handleCloseModalDeleteClient}
+        onRefetchClientList={() => refetchClients()}/>
       <EditClientModal 
       openModalEditClient={openModalEditClient} 
       OnFinish={handleFinish} 

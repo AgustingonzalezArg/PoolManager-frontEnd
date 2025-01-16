@@ -37,30 +37,30 @@ export const fetchEditClient = async (idUser: number, values: DataType): Promise
     })
   }
   
-export const fetchUpdateCleanToday = async (idUser: number, arrayIds: Key[]): Promise<void> => {
-    return await fetch(`http://localhost:3000/clients/cleantoday/${idUser}`, {
-      method: "PATCH",
-      headers: {
-        'Content-Type' : 'application/json',
-      },
-      body: JSON.stringify(arrayIds)
-    })
-    .then(res => {
-      if(!res.ok) throw new Error("Can't add clients to CleanToday")
-      return res.json()
-    })
-  }
+// export const fetchUpdateCleanToday = async (idUser: number, arrayIds: Key[]): Promise<void> => {
+//     return await fetch(`http://localhost:3000/clients/cleantoday/${idUser}`, {
+//       method: "PATCH",
+//       headers: {
+//         'Content-Type' : 'application/json',
+//       },
+//       body: JSON.stringify(arrayIds)
+//     })
+//     .then(res => {
+//       if(!res.ok) throw new Error("Can't add clients to CleanToday")
+//       return res.json()
+//     })
+//   }
   
-export const fetchUpdateTomorrowToday = async (idUser: number, arrayIds: Key[]): Promise<void> => {
-    return await fetch(`http://localhost:3000/clients/cleantomorrow/${idUser}`, {
-      method: "PATCH",
-      headers: {
-        'Content-Type' : 'application/json',
-      },
-      body: JSON.stringify(arrayIds)
-    })
-    .then(res => {
-      if(!res.ok) throw new Error("Can't add clients to CleanTomorrow")
-      return res.json()
-    })
-  }
+// export const fetchUpdateTomorrowToday = async (idUser: number, arrayIds: Key[]): Promise<void> => {
+//     return await fetch(`http://localhost:3000/clients/cleantomorrow/${idUser}`, {
+//       method: "PATCH",
+//       headers: {
+//         'Content-Type' : 'application/json',
+//       },
+//       body: JSON.stringify(arrayIds)
+//     })
+//     .then(res => {
+//       if(!res.ok) throw new Error("Can't add clients to CleanTomorrow")
+//       return res.json()
+//     })
+//   }
