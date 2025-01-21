@@ -2,7 +2,6 @@ import { Button, Col, message, Modal, Row } from "antd"
 import { dataColumnsType } from "../../pages/HomePage"
 import { useMutation } from "@tanstack/react-query"
 import { deletePayments } from "../../fetchs/payment"
-import Title from "antd/es/skeleton/Title"
 
 type Props = {
   cleaning: dataColumnsType | undefined
